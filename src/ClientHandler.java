@@ -24,7 +24,6 @@ public class ClientHandler extends Thread {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             // Solicitar e armazenar o nome do cliente
-            out.println("Digite seu nome:");
             clientName = in.readLine();
 
             // Avisar a todos que um novo cliente se conectou
