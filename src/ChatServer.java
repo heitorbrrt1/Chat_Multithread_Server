@@ -3,7 +3,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("FieldMayBeFinal")
+@SuppressWarnings({"FieldMayBeFinal", "CallToPrintStackTrace"})
 public class ChatServer implements ChatServerInterface {
     private static final int PORT = 12345;
     private List<ClientHandler> clients = new ArrayList<>();
@@ -27,7 +27,6 @@ public class ChatServer implements ChatServerInterface {
                 client.start();
             }
         } catch (IOException e) {
-            //noinspection CallToPrintStackTrace
             e.printStackTrace();
         }
     }
