@@ -67,6 +67,40 @@ public class ClientHandler extends Thread {
         }
     }
 
+    private String getEmoji(String emojiName) {
+        switch (emojiName) {
+            case "smile":
+                return "😀"; // Emoji de sorriso
+            case "heart":
+                return "❤️"; // Emoji de coração
+            case "sad":
+                return "😢"; // Emoji de cara triste
+            case "thumbsup":
+                return "👍"; // Emoji de polegar para cima
+            case "thumbsdown":
+                return "👎"; // Emoji de polegar para baixo
+            case "clap":
+                return "👏"; // Emoji de aplausos
+            case "fire":
+                return "🔥"; // Emoji de fogo
+            // Adicione mais casos para outros emojis, se necessário
+            default:
+                return null; // Retorne null se o emoji não for reconhecido
+        }
+    }
+    private boolean isEndVoteMessage(String message) {
+        return message.equals("<endvote>");
+    }
+
+    private boolean isVoteMessage(String message) {
+        return message.startsWith("<vote:") && message.endsWith(">");
+    }
+    private String extractVoteOption(String message) {
+        int startIndex = "<vote:".length();
+        int endIndex = message.length() - 1;
+        return message.substring(startIndex, endIndex);
+    }
+
     public void sendMessage(String message) {
         out.println(message);
     }
