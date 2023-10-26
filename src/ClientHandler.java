@@ -1,14 +1,18 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal", "CallToPrintStackTrace", "ThrowFromFinallyBlock"})
 public class ClientHandler extends Thread {
     private Socket socket;
     private PrintWriter out;
     private BufferedReader in;
     private String clientName;
     private ChatServerInterface server;
-
+    boolean votacaoEncerrada = false;
     public ClientHandler(Socket socket, ChatServerInterface server) {
         this.socket = socket;
         this.server = server;
@@ -35,7 +39,45 @@ public class ClientHandler extends Thread {
                 if (message == null) {
                     break;
                 }
-                if (isPrivateMessage(message)) {
+
+                if (containsEmojiTag(message)) {
+                    // É uma mensagem com emoji
+                    String emojiName = extractEmojiName(message);
+                    if (emojiName != null) {
+                        // Obtenha o emoji com base no nome (por exemplo, usando a função getEmoji)
+                        String emoji = getEmoji(emojiName);
+                        if (emoji != null) {
+                            // Substitua a tag do emoji pelo emoji real no conteúdo da mensagem
+                            message = message.replace("<emoji:" + emojiName + ">", emoji);
+                        }
+                    }
+                }
+                if (isEnqueteMessage(message)) {
+                    // Mensagem de início de enquete
+                    votacaoEncerrada=false;
+                    String enqueteContent = message.substring("<enquete>".length(), message.indexOf("<enquete/>"));
+                    String[] enqueteData = enqueteContent.split(";");
+                    String question = enqueteData[0];
+                    String[] options = Arrays.copyOfRange(enqueteData, 1, enqueteData.length);
+                    server.broadcastEnquete(question, options, this);
+                } else if (isVoteMessage(message)) {
+                    // Mensagem de voto
+                    if(votacaoEncerrada){
+                        sendMessage("Votacao encerrada!");
+                    }else {
+                        String option = extractVoteOption(message);
+                        server.recordVote(option, this);
+                    }
+
+                } else if (isEndVoteMessage(message)) {
+                    // Mensagem de finalização de votação
+                     votacaoEncerrada = true;
+                    Map<String, Integer> enqueteResults = server.getEnqueteResults();
+                    sendMessage("Resultado da enquete:");
+                    for (Map.Entry<String, Integer> entry : enqueteResults.entrySet()) {
+                        sendMessage(entry.getKey() + ": " + entry.getValue() + " votos");
+                    }
+                }else if (isPrivateMessage(message)) {
                     // Mensagem privada
                     String recipient = extractRecipient(message);
                     String msgContent = extractMessageContent(message);
@@ -43,9 +85,9 @@ public class ClientHandler extends Thread {
                 } else if (isValidMessage(message)) {
                     // Mensagem pública
                     String msgContent = extractMessageContent(message);
-                    server.broadcastMessage(msgContent, this);
+                    server.broadcastMessage(clientName + ": " + msgContent, this);
                 } else {
-                    sendMessage("Mensagem inválida. As mensagens públicas devem estar no formato <msg>mensagem<msg/> e as mensagens privadas devem estar no formato <private>destinatário<private/><msg>mensagem<msg/>.");
+                    sendMessage("Mensagem inválida. As mensagens públicas devem estar no formato <msg>mensagem<msg/> e as mensagens privadas devem estar no formato <private>destinatário</private><msg>mensagem<msg/>.");
                 }
             }
         } catch (IOException e) {
@@ -104,7 +146,14 @@ public class ClientHandler extends Thread {
     public void sendMessage(String message) {
         out.println(message);
     }
-
+    private boolean isEnqueteMessage(String message) {
+        return message.startsWith("<enquete>") && message.endsWith("<enquete/>");
+    }
+    // Extrai os dados da enquete (pergunta e opções) da mensagem
+    private String[] extractEnqueteData(String message) {
+        String enqueteContent = message.substring("<enquete>".length(), message.indexOf("<enquete/>"));
+        return enqueteContent.split(";");
+    }
     // Verifica se a mensagem é privada
     private boolean isPrivateMessage(String message) {
         return message.startsWith("<private>") && message.contains("<private/>");
@@ -113,7 +162,7 @@ public class ClientHandler extends Thread {
     // Extrai o nome do destinatário de uma mensagem privada
     private String extractRecipient(String message) {
         int start = message.indexOf("<private>") + "<private>".length();
-        int end = message.indexOf("</private>");
+        int end = message.indexOf("<private/>");
         return message.substring(start, end);
     }
 
@@ -128,4 +177,27 @@ public class ClientHandler extends Thread {
     private boolean isValidMessage(String message) {
         return message.startsWith("<msg>") && message.endsWith("<msg/>");
     }
+    // Verifica se a mensagem contém uma tag de emoji
+    private boolean containsEmojiTag(String message) {
+        return message.matches(".*<emoji:[a-zA-Z]+>.*");
+    }
+
+
+    private String replaceEmojiTagWithEmoji(String message, String emoji) {
+        return message.replaceAll("<emoji:[a-zA-Z]+>", emoji);
+    }
+
+    // Extrai o nome do emoji da mensagem
+    private String extractEmojiName(String message) {
+        // Use uma expressão regular para encontrar a tag do emoji
+        // e extrair o nome do emoji
+        String regex = "<emoji:([a-zA-Z]+)>";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(message);
+        if (matcher.find()) {
+            return matcher.group(1); // Captura somente o nome do emoji
+        }
+        return null; // Retorna null se nenhum nome de emoji for encontrado
+    }
+
 }
