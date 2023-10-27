@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings({"FieldMayBeFinal", "CallToPrintStackTrace"})
 public class ChatServer implements ChatServerInterface {
     private static final int PORT = 12345;
     private List<ClientHandler> clients = new ArrayList<>();

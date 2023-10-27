@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -100,12 +100,7 @@ public class ClientHandler extends Thread {
             }
             // Remover o cliente da lista de clientes
             server.removeClient(this);
-            // Avisar a todos que o cliente desconectou
-            try {
-                server.broadcastMessage(clientName + " saiu da sala.", this);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+
         }
     }
 
@@ -181,7 +176,7 @@ public class ClientHandler extends Thread {
     private boolean containsEmojiTag(String message) {
         return message.matches(".*<emoji:[a-zA-Z]+>.*");
     }
-
+// 🫂😘🤝
 
     private String replaceEmojiTagWithEmoji(String message, String emoji) {
         return message.replaceAll("<emoji:[a-zA-Z]+>", emoji);

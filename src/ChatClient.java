@@ -10,7 +10,7 @@ public class ChatClient {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader consoleIn = new BufferedReader(new InputStreamReader(System.in));
 
-            System.out.println("Conectado ao servidor. \nDigite seu nome: ");
+            System.out.println("Conectado ao servidor. \n<help> Para mostrar as tags \nDigite seu nome: ");
             String clientName = consoleIn.readLine();
             out.println(clientName);
 
