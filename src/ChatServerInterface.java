@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.net.Socket;
+import java.util.List;
 import java.util.Map;
 
 public interface ChatServerInterface {
@@ -13,4 +15,10 @@ public interface ChatServerInterface {
     void recordVote(String option, ClientHandler voter);
 
     Map<String, Integer> getEnqueteResults();
+
+    List<String> getConnectedUserNames(ClientHandler clientHandler);
+
+    void sendHug(String hugRecipient, String clientName,ClientHandler clientHandler);
+    void sendKiss(String hugRecipient, String clientName,ClientHandler clientHandler);
+    void sendHandshake(String hugRecipient, String clientName,ClientHandler clientHandler);
 }

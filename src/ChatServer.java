@@ -9,6 +9,7 @@ public class ChatServer implements ChatServerInterface {
     private static final int PORT = 12345;
     private List<ClientHandler> clients = new ArrayList<>();
     private Map<String, Integer> voteCounts = new HashMap<>();
+
     public static void main(String[] args) {
         ChatServer server = new ChatServer();
         server.start();
@@ -76,7 +77,7 @@ public class ChatServer implements ChatServerInterface {
                 return; // Enviamos a mensagem apenas para o destinatário
             }
         }
-        sender.sendMessage("Destinatário não encontrado ou offline: " + recipient);
+
     }
     @Override
     public void broadcastEnquete(String question, String[] options, ClientHandler sender) {
@@ -87,4 +88,49 @@ public class ChatServer implements ChatServerInterface {
             }
         }
     }
+    public synchronized void sendHug(String recipient, String senderName,ClientHandler sender) {
+        for (ClientHandler client : clients) {
+            if (client.getClientName().equals(recipient)) {
+
+                client.sendMessage(senderName + " mandou um abraço para você!");
+                return;
+            }
+        }
+        sender.sendMessage("Destinatário não encontrado ou offline: " + recipient);
+
+    }
+    public synchronized void sendKiss(String recipient, String senderName,ClientHandler sender) {
+        for (ClientHandler client : clients) {
+            if (client.getClientName().equals(recipient)) {
+
+                client.sendMessage(senderName + " mandou um beijo para você!");
+                return;
+            }
+        }
+        sender.sendMessage("Destinatário não encontrado ou offline: " + recipient);
+
+    }
+    public synchronized void sendHandshake(String recipient, String senderName,ClientHandler sender) {
+        for (ClientHandler client : clients) {
+            if (client.getClientName().equals(recipient)) {
+
+                client.sendMessage(senderName + "apertou sua mão!");
+                return;
+            }
+        }
+        sender.sendMessage("Destinatário não encontrado ou offline: " + recipient);
+
+    }
+
+    public List<String> getConnectedUserNames(ClientHandler sender) {
+        List<String> userNames = new ArrayList<>();
+        for (ClientHandler client : clients) {
+            if (client != sender) {
+                userNames.add(client.getClientName());
+            }
+        }
+        return userNames;
+    }
+
+
 }

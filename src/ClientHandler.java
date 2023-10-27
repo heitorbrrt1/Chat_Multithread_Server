@@ -13,9 +13,12 @@ public class ClientHandler extends Thread {
     private String clientName;
     private ChatServerInterface server;
     boolean votacaoEncerrada = false;
+    private boolean connected;
+    private boolean valid=true;
     public ClientHandler(Socket socket, ChatServerInterface server) {
         this.socket = socket;
         this.server = server;
+        this.connected=true;
     }
 
     public String getClientName() {
@@ -34,9 +37,12 @@ public class ClientHandler extends Thread {
             server.broadcastMessage(clientName + " entrou na sala.", this);
 
             String message;
-            while (true) {
+            while (connected) {
                 message = in.readLine();
                 if (message == null) {
+                    break;
+                }
+                if(isQuitMessage(message)){
                     break;
                 }
 
@@ -52,6 +58,231 @@ public class ClientHandler extends Thread {
                         }
                     }
                 }
+
+                if (message.matches(".*<red>.*<red/>.*")) {
+                    String startTag = "<red>";
+                    String endTag = "<red/>";
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+                    if (startIndex != -1 && endIndex != -1) {
+                        String textBeforeRed = message.substring(0, startIndex);
+                        String textAfterRed = message.substring(endIndex + endTag.length());
+                        String redText = "\u001B[31m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+                        message = textBeforeRed + redText + textAfterRed;
+                    }
+                }
+                if (message.matches(".*<blue>.*<blue/>.*")) {
+                    // Encontre a tag <blue> e <blue/> na mensagem
+                    String startTag = "<blue>";
+                    String endTag = "<blue/>";
+
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        // Substitua a tag pela formatação ANSI para azul apenas na parte desejada
+                        String textBeforeBlue = message.substring(0, startIndex);
+                        String textAfterBlue = message.substring(endIndex + endTag.length());
+
+                        String blueText = "\u001B[34m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+
+                        // Reconstrua a mensagem com a formatação de cor azul apenas na parte desejada
+                        message = textBeforeBlue + blueText + textAfterBlue;
+                    }
+                }
+
+                if (message.matches(".*<green>.*<green/>.*")) {
+                    // Encontre a tag <green> e <green/> na mensagem
+                    String startTag = "<green>";
+                    String endTag = "<green/>";
+
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        // Substitua a tag pela formatação ANSI para verde apenas na parte desejada
+                        String textBeforeGreen = message.substring(0, startIndex);
+                        String textAfterGreen = message.substring(endIndex + endTag.length());
+
+                        String greenText = "\u001B[32m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+
+                        // Reconstrua a mensagem com a formatação de cor verde apenas na parte desejada
+                        message = textBeforeGreen + greenText + textAfterGreen;
+                    }
+                }
+                if (message.matches(".*<yellow>.*<yellow/>.*")) {
+                    String startTag = "<yellow>";
+                    String endTag = "<yellow/>";
+
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String textBeforeYellow = message.substring(0, startIndex);
+                        String textAfterYellow = message.substring(endIndex + endTag.length());
+
+                        String yellowText = "\u001B[33m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+
+                        message = textBeforeYellow + yellowText + textAfterYellow;
+                    }
+                }
+
+                if (message.matches(".*<purple>.*<purple/>.*")) {
+                    String startTag = "<purple>";
+                    String endTag = "<purple/>";
+
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String textBeforePurple = message.substring(0, startIndex);
+                        String textAfterPurple = message.substring(endIndex + endTag.length());
+
+                        String purpleText = "\u001B[35m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+
+                        message = textBeforePurple + purpleText + textAfterPurple;
+                    }
+                }
+                if (message.matches(".*<orange>.*<orange/>.*")) {
+                    String startTag = "<orange>";
+                    String endTag = "<orange/>";
+
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String textBeforeOrange = message.substring(0, startIndex);
+                        String textAfterOrange = message.substring(endIndex + endTag.length());
+
+                        String orangeText = "\u001B[38;5;202m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+
+                        message = textBeforeOrange + orangeText + textAfterOrange;
+                    }
+                }
+
+                if (message.matches(".*<brown>.*<brown/>.*")) {
+                    String startTag = "<brown>";
+                    String endTag = "<brown/>";
+
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String textBeforeBrown = message.substring(0, startIndex);
+                        String textAfterBrown = message.substring(endIndex + endTag.length());
+
+                        String brownText = "\u001B[38;5;94m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+
+                        message = textBeforeBrown + brownText + textAfterBrown;
+                    }
+                }
+                if (message.matches(".*<cyan>.*<cyan/>.*")) {
+                    String startTag = "<cyan>";
+                    String endTag = "<cyan/>";
+
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String textBeforeCyan = message.substring(0, startIndex);
+                        String textAfterCyan = message.substring(endIndex + endTag.length());
+
+                        String cyanText = "\u001B[36m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
+
+                        message = textBeforeCyan + cyanText + textAfterCyan;
+                    }
+                }
+
+
+
+                if (isPrivateMessage(message)) {
+                    // Mensagem privada
+                    String recipient = extractRecipient(message);
+                    String msgContent = extractMessageContent(message);
+                    server.sendPrivateMessage(recipient, msgContent, this);
+                }else if (isValidMessage(message)) {
+                    // Mensagem pública
+
+                    String msgContent = extractMessageContent(message);
+                    server.broadcastMessage(clientName + ": " + msgContent, this);
+                } else {
+                    valid=false;
+                }
+                if (isRenameMessage(message)) {
+                    String startTag = "<rename:";
+                    String endTag = ">";
+                    int startIndex = message.indexOf(startTag);
+                    int endIndex = message.indexOf(endTag);
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        String newName = message.substring(startIndex + startTag.length(), endIndex);
+                        String textAfterRename = message.substring(endIndex + 1);
+                        String oldName = clientName;
+
+                        // Altere o nome do cliente
+                        clientName = newName;
+
+                        // Avisar aos outros clientes que o nome foi alterado
+                        server.broadcastMessage(oldName + " agora é " + newName, this);
+
+                        // Remova a parte da tag <rename:nome> da mensagem
+                        message = textAfterRename;
+                        valid=true;
+                    }
+                }
+                if (isUsersMessage(message)) {
+                    // Mensagem de solicitação de lista de usuários
+                    valid=true;
+                    List<String> connectedUserNames = server.getConnectedUserNames(this);
+                    sendMessage("Usuários conectados: " + String.join(", ", connectedUserNames));
+                }
+                if (isHelpMessage(message)) {
+                    // Mensagem de ajuda
+                    sendMessage("Para enviar uma mensagem: <msg>'conteudo'<msg/>");
+                    sendMessage("Para enviar uma mensagem privada: <private>'usuario'<private/>");
+                    sendMessage("Para adicionar um emoji na mensagem: <emoji:'nomedoemoji'>");
+                    sendMessage("Para iniciar uma enquete: <enquete>pergunta;opção1;opção2;opção n<enquete/>");
+                    sendMessage("Para votar em uma enquete: <vote:'opção'>");
+                    sendMessage("Para encerrar a votação: <endvote>");
+                    sendMessage("Para escrever em vermelho: <red>'conteudo'<red/>");
+                    sendMessage("Para escrever em azul: <blue>'conteudo'<blue/>");
+                    sendMessage("Para escrever em verde: <green>'conteudo'<green/>");
+                    sendMessage("Para escrever em amarelo: <yellow>'conteudo'<yellow/>");
+                    sendMessage("Para escrever em roxo: <purple>'conteudo'<purple/>");
+                    sendMessage("Para escrever em laranja: <orange>'conteudo'<orange/>");
+                    sendMessage("Para escrever em marrom: <brown>'conteudo'<brown/>");
+                    sendMessage("Para escrever em ciano: <cyan>'conteudo'<cyan/>");
+                    sendMessage("Para se desconectar: <quit>");
+                    sendMessage("Para trocar de nome: <rename:'conteudo'>");
+                    sendMessage("Para mostrar os usuarios conectados: <users>");
+
+                    valid=true;
+                }
+                if (isHugMessage(message)) {
+                    // Extrai o nome do cliente que deve receber o abraço
+                    valid=true;
+                    String hugRecipient = message.substring(message.indexOf(":") + 1, message.indexOf(">"));
+
+                    // Envia o abraço
+                    server.sendHug(hugRecipient, clientName,this);
+                }
+                if (isKissMessage(message)) {
+                    // Extrai o nome do cliente que deve receber o abraço
+                    valid=true;
+                    String kissRecipient = message.substring(message.indexOf(":") + 1, message.indexOf(">"));
+
+                    // Envia o abraço
+                    server.sendKiss(kissRecipient, clientName,this);
+                }
+                if (isHandshakeMessage(message)) {
+                    // Extrai o nome do cliente que deve receber o abraço
+                    valid=true;
+                    String handshakeRecipient = message.substring(message.indexOf(":") + 1, message.indexOf(">"));
+
+                    // Envia o abraço
+                    server.sendHandshake(handshakeRecipient, clientName,this);
+                }
+
                 if (isEnqueteMessage(message)) {
                     // Mensagem de início de enquete
                     votacaoEncerrada=false;
@@ -60,8 +291,10 @@ public class ClientHandler extends Thread {
                     String question = enqueteData[0];
                     String[] options = Arrays.copyOfRange(enqueteData, 1, enqueteData.length);
                     server.broadcastEnquete(question, options, this);
+                    valid=true;
                 } else if (isVoteMessage(message)) {
                     // Mensagem de voto
+                    valid=true;
                     if(votacaoEncerrada){
                         sendMessage("Votacao encerrada!");
                     }else {
@@ -71,23 +304,17 @@ public class ClientHandler extends Thread {
 
                 } else if (isEndVoteMessage(message)) {
                     // Mensagem de finalização de votação
-                     votacaoEncerrada = true;
+                    valid=true;
+                    votacaoEncerrada = true;
                     Map<String, Integer> enqueteResults = server.getEnqueteResults();
                     sendMessage("Resultado da enquete:");
                     for (Map.Entry<String, Integer> entry : enqueteResults.entrySet()) {
                         sendMessage(entry.getKey() + ": " + entry.getValue() + " votos");
                     }
-                }else if (isPrivateMessage(message)) {
-                    // Mensagem privada
-                    String recipient = extractRecipient(message);
-                    String msgContent = extractMessageContent(message);
-                    server.sendPrivateMessage(recipient, msgContent, this);
-                } else if (isValidMessage(message)) {
-                    // Mensagem pública
-                    String msgContent = extractMessageContent(message);
-                    server.broadcastMessage(clientName + ": " + msgContent, this);
-                } else {
+                }
+                if(valid==false){
                     sendMessage("Mensagem inválida. As mensagens públicas devem estar no formato <msg>mensagem<msg/> e as mensagens privadas devem estar no formato <private>destinatário</private><msg>mensagem<msg/>.");
+
                 }
             }
         } catch (IOException e) {
@@ -125,8 +352,30 @@ public class ClientHandler extends Thread {
                 return null; // Retorne null se o emoji não for reconhecido
         }
     }
+    private boolean isKissMessage(String message) {
+        return message.matches("<kiss:[^>]+>");
+    }
+    private boolean isHandshakeMessage(String message) {
+        return message.matches("<handshake:[^>]+>");
+    }
+    private boolean isHugMessage(String message) {
+        return message.matches("<hug:[^>]+>");
+    }
+
+    private boolean isUsersMessage(String message) {
+        return message.equals("<users>");
+    }
+    private boolean isHelpMessage(String message) {
+        return message.equals("<help>");
+    }
+    private boolean isRenameMessage(String message) {
+        return message.matches(".*<rename:.*>.*");
+    }
     private boolean isEndVoteMessage(String message) {
         return message.equals("<endvote>");
+    }
+    private boolean isQuitMessage(String message) {
+        return message.equals("<quit>");
     }
 
     private boolean isVoteMessage(String message) {
