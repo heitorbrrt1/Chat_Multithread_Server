@@ -7,14 +7,6 @@ Este documento descreve um protocolo de chat multiusuário implementado em Java.
 - Caio César
 - Heitor Barreto
 
-## Data de Publicação
-
-30 de janeiro de 2023
-
-## Status deste Memo
-
-Este documento especifica um protocolo de chat multiusuário implementado em Java.
-
 ## Resumo
 
 Este mini RFC descreve um protocolo de comunicação para um serviço de chat multiusuário, fornecendo as palavras-chave, sua sintaxe e semântica no contexto do serviço.
