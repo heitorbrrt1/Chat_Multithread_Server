@@ -1,4 +1,4 @@
-# Protocolo de Chat Multiusuário
+# Protocolo de Chat Multithread
 
 Este documento descreve um protocolo de chat multiusuário implementado em Java. Ele fornece informações sobre os comandos disponíveis, sua sintaxe e semântica no contexto do serviço.
 
