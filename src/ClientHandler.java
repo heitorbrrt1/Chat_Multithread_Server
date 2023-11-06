@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal", "CallToPrintStackTrace"})
 public class ClientHandler extends Thread {
     private Socket socket;
     private PrintWriter out;
@@ -25,40 +26,46 @@ public class ClientHandler extends Thread {
         return clientName;
     }
 
+    // O método run é executado quando uma instância de ClientHandler é iniciada como uma thread.
     public void run() {
         try {
+            // Inicializa os fluxos de saída e entrada para comunicação com o cliente.
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            // Solicitar e armazenar o nome do cliente
+            // Lê o nome do cliente a partir do fluxo de entrada.
             clientName = in.readLine();
 
-            // Avisar a todos que um novo cliente se conectou
+            // Notifica o servidor que o cliente entrou na sala.
             server.broadcastMessage(clientName + " entrou na sala.", this);
 
             String message;
             while (connected) {
+                // Lê as mensagens do cliente enquanto a conexão estiver ativa.
                 message = in.readLine();
+
+                // Verifica se a mensagem é nula, indicando que o cliente encerrou a conexão.
                 if (message == null) {
                     break;
                 }
-                if(isQuitMessage(message)){
+
+                // Verifica se a mensagem é um comando de saída.
+                if (isQuitMessage(message)) {
                     break;
                 }
 
+                // Verifica se a mensagem contém uma tag de emoji e a substitui pelo emoji correspondente.
                 if (containsEmojiTag(message)) {
-                    // É uma mensagem com emoji
                     String emojiName = extractEmojiName(message);
                     if (emojiName != null) {
-                        // Obtenha o emoji com base no nome (por exemplo, usando a função getEmoji)
                         String emoji = getEmoji(emojiName);
                         if (emoji != null) {
-                            // Substitua a tag do emoji pelo emoji real no conteúdo da mensagem
                             message = message.replace("<emoji:" + emojiName + ">", emoji);
                         }
                     }
                 }
 
+                // Verifica se a mensagem contém uma tag de formatação para texto vermelho e a aplica.
                 if (message.matches(".*<red>.*<red/>.*")) {
                     String startTag = "<red>";
                     String endTag = "<red/>";
@@ -71,8 +78,9 @@ public class ClientHandler extends Thread {
                         message = textBeforeRed + redText + textAfterRed;
                     }
                 }
+
+                // Verifica se a mensagem contém uma tag de formatação para texto azul e a aplica.
                 if (message.matches(".*<blue>.*<blue/>.*")) {
-                    // Encontre a tag <blue> e <blue/> na mensagem
                     String startTag = "<blue>";
                     String endTag = "<blue/>";
 
@@ -80,19 +88,17 @@ public class ClientHandler extends Thread {
                     int endIndex = message.indexOf(endTag);
 
                     if (startIndex != -1 && endIndex != -1) {
-                        // Substitua a tag pela formatação ANSI para azul apenas na parte desejada
                         String textBeforeBlue = message.substring(0, startIndex);
                         String textAfterBlue = message.substring(endIndex + endTag.length());
 
                         String blueText = "\u001B[34m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
 
-                        // Reconstrua a mensagem com a formatação de cor azul apenas na parte desejada
                         message = textBeforeBlue + blueText + textAfterBlue;
                     }
                 }
 
+                // Verifica se a mensagem contém uma tag de formatação para texto verde e a aplica.
                 if (message.matches(".*<green>.*<green/>.*")) {
-                    // Encontre a tag <green> e <green/> na mensagem
                     String startTag = "<green>";
                     String endTag = "<green/>";
 
@@ -100,16 +106,16 @@ public class ClientHandler extends Thread {
                     int endIndex = message.indexOf(endTag);
 
                     if (startIndex != -1 && endIndex != -1) {
-                        // Substitua a tag pela formatação ANSI para verde apenas na parte desejada
                         String textBeforeGreen = message.substring(0, startIndex);
                         String textAfterGreen = message.substring(endIndex + endTag.length());
 
                         String greenText = "\u001B[32m" + message.substring(startIndex + startTag.length(), endIndex) + "\u001B[0m";
 
-                        // Reconstrua a mensagem com a formatação de cor verde apenas na parte desejada
                         message = textBeforeGreen + greenText + textAfterGreen;
                     }
                 }
+
+                // Verifica se a mensagem contém uma tag de formatação para texto amarelp e a aplica.
                 if (message.matches(".*<yellow>.*<yellow/>.*")) {
                     String startTag = "<yellow>";
                     String endTag = "<yellow/>";
@@ -127,6 +133,7 @@ public class ClientHandler extends Thread {
                     }
                 }
 
+                // Verifica se a mensagem contém uma tag de formatação para texto violeta e a aplica.
                 if (message.matches(".*<purple>.*<purple/>.*")) {
                     String startTag = "<purple>";
                     String endTag = "<purple/>";
@@ -143,6 +150,7 @@ public class ClientHandler extends Thread {
                         message = textBeforePurple + purpleText + textAfterPurple;
                     }
                 }
+                // Verifica se a mensagem contém uma tag de formatação para texto laranja e a aplica.
                 if (message.matches(".*<orange>.*<orange/>.*")) {
                     String startTag = "<orange>";
                     String endTag = "<orange/>";
@@ -160,6 +168,7 @@ public class ClientHandler extends Thread {
                     }
                 }
 
+                // Verifica se a mensagem contém uma tag de formatação para texto marrom e a aplica.
                 if (message.matches(".*<brown>.*<brown/>.*")) {
                     String startTag = "<brown>";
                     String endTag = "<brown/>";
@@ -176,6 +185,8 @@ public class ClientHandler extends Thread {
                         message = textBeforeBrown + brownText + textAfterBrown;
                     }
                 }
+
+                // Verifica se a mensagem contém uma tag de formatação para texto ciano e a aplica.
                 if (message.matches(".*<cyan>.*<cyan/>.*")) {
                     String startTag = "<cyan>";
                     String endTag = "<cyan/>";
@@ -193,21 +204,19 @@ public class ClientHandler extends Thread {
                     }
                 }
 
-
-
+                // Verifica se a mensagem é uma mensagem privada e a encaminha para o destinatário.
                 if (isPrivateMessage(message)) {
-                    // Mensagem privada
                     String recipient = extractRecipient(message);
                     String msgContent = extractMessageContent(message);
                     server.sendPrivateMessage(recipient, msgContent, this);
                 }else if (isValidMessage(message)) {
-                    // Mensagem pública
-
                     String msgContent = extractMessageContent(message);
                     server.broadcastMessage(clientName + ": " + msgContent, this);
                 } else {
                     valid=false;
                 }
+
+                // Verifica se a mensagem é um comando de renomear o cliente.
                 if (isRenameMessage(message)) {
                     String startTag = "<rename:";
                     String endTag = ">";
@@ -219,25 +228,24 @@ public class ClientHandler extends Thread {
                         String textAfterRename = message.substring(endIndex + 1);
                         String oldName = clientName;
 
-                        // Altere o nome do cliente
                         clientName = newName;
 
-                        // Avisar aos outros clientes que o nome foi alterado
                         server.broadcastMessage(oldName + " agora é " + newName, this);
 
-                        // Remova a parte da tag <rename:nome> da mensagem
                         message = textAfterRename;
                         valid=true;
                     }
                 }
+
+                // Verifica se a mensagem é um comando para listar os usuários conectados.
                 if (isUsersMessage(message)) {
-                    // Mensagem de solicitação de lista de usuários
                     valid=true;
                     List<String> connectedUserNames = server.getConnectedUserNames(this);
                     sendMessage("Usuários conectados: " + String.join(", ", connectedUserNames));
                 }
+
+                // Verifica se a mensagem é um comando de ajuda e envia informações de ajuda ao cliente.
                 if (isHelpMessage(message)) {
-                    // Mensagem de ajuda
                     sendMessage("Para enviar uma mensagem: <msg>'conteudo'<msg/>");
                     sendMessage("Para enviar uma mensagem privada: <private>'usuario'<private/>");
                     sendMessage("Para adicionar um emoji na mensagem: <emoji:'nomedoemoji'>");
@@ -254,37 +262,33 @@ public class ClientHandler extends Thread {
                     sendMessage("Para escrever em ciano: <cyan>'conteudo'<cyan/>");
                     sendMessage("Para se desconectar: <quit>");
                     sendMessage("Para trocar de nome: <rename:'conteudo'>");
-                    sendMessage("Para mostrar os usuarios conectados: <users>");
+                    sendMessage("Para enviar um abraço <hug:'nome'>");
+                    sendMessage("Para enviar um aperto de mão <handshake:'nome'>");
+                    sendMessage("Para enviar um beijo <kiss:'nome'>");
 
                     valid=true;
                 }
+                String substring = message.substring(message.indexOf(":") + 1, message.indexOf(">"));
+                // Verifica se a mensagem é um comando para enviar um abraço
                 if (isHugMessage(message)) {
-                    // Extrai o nome do cliente que deve receber o abraço
                     valid=true;
-                    String hugRecipient = message.substring(message.indexOf(":") + 1, message.indexOf(">"));
 
-                    // Envia o abraço
-                    server.sendHug(hugRecipient, clientName,this);
+                    server.sendHug(substring, clientName,this);
                 }
+                // Verifica se a mensagem é um comando para enviar um beijo
                 if (isKissMessage(message)) {
-                    // Extrai o nome do cliente que deve receber o abraço
                     valid=true;
-                    String kissRecipient = message.substring(message.indexOf(":") + 1, message.indexOf(">"));
 
-                    // Envia o abraço
-                    server.sendKiss(kissRecipient, clientName,this);
+                    server.sendKiss(substring, clientName,this);
                 }
+                // Verifica se a mensagem é um comando para enviar um aperto de mão
                 if (isHandshakeMessage(message)) {
-                    // Extrai o nome do cliente que deve receber o abraço
                     valid=true;
-                    String handshakeRecipient = message.substring(message.indexOf(":") + 1, message.indexOf(">"));
 
-                    // Envia o abraço
-                    server.sendHandshake(handshakeRecipient, clientName,this);
+                    server.sendHandshake(substring, clientName,this);
                 }
-
+                // Verifica se a mensagem é um comando para iniciar uma enquete.
                 if (isEnqueteMessage(message)) {
-                    // Mensagem de início de enquete
                     votacaoEncerrada=false;
                     String enqueteContent = message.substring("<enquete>".length(), message.indexOf("<enquete/>"));
                     String[] enqueteData = enqueteContent.split(";");
@@ -292,8 +296,9 @@ public class ClientHandler extends Thread {
                     String[] options = Arrays.copyOfRange(enqueteData, 1, enqueteData.length);
                     server.broadcastEnquete(question, options, this);
                     valid=true;
-                } else if (isVoteMessage(message)) {
-                    // Mensagem de voto
+                }
+                // Se a mensagem for um voto em uma enquete, registra o voto.
+                else if (isVoteMessage(message)) {
                     valid=true;
                     if(votacaoEncerrada){
                         sendMessage("Votacao encerrada!");
@@ -302,8 +307,9 @@ public class ClientHandler extends Thread {
                         server.recordVote(option, this);
                     }
 
-                } else if (isEndVoteMessage(message)) {
-                    // Mensagem de finalização de votação
+                }
+                // Se a mensagem indica o encerramento de uma votação, exibe os resultados.
+                else if (isEndVoteMessage(message)) {
                     valid=true;
                     votacaoEncerrada = true;
                     Map<String, Integer> enqueteResults = server.getEnqueteResults();
@@ -312,8 +318,9 @@ public class ClientHandler extends Thread {
                         sendMessage(entry.getKey() + ": " + entry.getValue() + " votos");
                     }
                 }
-                if(valid==false){
-                    sendMessage("Mensagem inválida. As mensagens públicas devem estar no formato <msg>mensagem<msg/> e as mensagens privadas devem estar no formato <private>destinatário</private><msg>mensagem<msg/>.");
+                // Se a mensagem não for válida, envia uma mensagem de erro ao cliente.
+                if(!valid){
+                    sendMessage("Mensagem inválida. As mensagens públicas devem estar no formato <msg>mensagem<msg/> \ne as mensagens privadas devem estar no formato <private>destinatário</private><msg>mensagem<msg/>.");
 
                 }
             }
@@ -321,127 +328,129 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         } finally {
             try {
+                // Fecha o soquete quando a conexão é encerrada.
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // Remover o cliente da lista de clientes
+            // Notifica o servidor que o cliente foi removido.
             server.removeClient(this);
 
         }
     }
 
+    // Método para obter um emoji com base no nome fornecido
     private String getEmoji(String emojiName) {
-        switch (emojiName) {
-            case "smile":
-                return "😀"; // Emoji de sorriso
-            case "heart":
-                return "❤️"; // Emoji de coração
-            case "sad":
-                return "😢"; // Emoji de cara triste
-            case "thumbsup":
-                return "👍"; // Emoji de polegar para cima
-            case "thumbsdown":
-                return "👎"; // Emoji de polegar para baixo
-            case "clap":
-                return "👏"; // Emoji de aplausos
-            case "fire":
-                return "🔥"; // Emoji de fogo
-            // Adicione mais casos para outros emojis, se necessário
-            default:
-                return null; // Retorne null se o emoji não for reconhecido
-        }
+        return switch (emojiName) {
+            case "smile" -> "😀";
+            case "heart" -> "❤️";
+            case "sad" -> "😢";
+            case "thumbsup" -> "👍";
+            case "thumbsdown" -> "👎";
+            case "clap" -> "👏";
+            case "fire" -> "🔥";
+            default -> null;
+        };
     }
+    // Verifica se a mensagem é do tipo "beijo"
     private boolean isKissMessage(String message) {
         return message.matches("<kiss:[^>]+>");
     }
+
+    // Verifica se a mensagem é do tipo "aperto de mão"
     private boolean isHandshakeMessage(String message) {
         return message.matches("<handshake:[^>]+>");
     }
+
+    // Verifica se a mensagem é do tipo "abraço"
     private boolean isHugMessage(String message) {
         return message.matches("<hug:[^>]+>");
     }
 
+    // Verifica se a mensagem é do tipo "usuários"
     private boolean isUsersMessage(String message) {
         return message.equals("<users>");
     }
+    // Verifica se a mensagem é do tipo "ajuda"
     private boolean isHelpMessage(String message) {
         return message.equals("<help>");
     }
+
+    // Verifica se a mensagem é do tipo "renomear"
     private boolean isRenameMessage(String message) {
         return message.matches(".*<rename:.*>.*");
     }
+
+    // Verifica se a mensagem é do tipo "encerrar votação"
     private boolean isEndVoteMessage(String message) {
         return message.equals("<endvote>");
     }
+
+    // Verifica se a mensagem é do tipo "sair"
     private boolean isQuitMessage(String message) {
         return message.equals("<quit>");
     }
 
+    // Verifica se a mensagem é do tipo "votar"
     private boolean isVoteMessage(String message) {
         return message.startsWith("<vote:") && message.endsWith(">");
     }
+
+    // Extrai a opção de voto de uma mensagem de voto
     private String extractVoteOption(String message) {
         int startIndex = "<vote:".length();
         int endIndex = message.length() - 1;
         return message.substring(startIndex, endIndex);
     }
 
+    // Método para enviar uma mensagem para o cliente
     public void sendMessage(String message) {
         out.println(message);
     }
+
+    // Verifica se a mensagem é do tipo "enquete"
     private boolean isEnqueteMessage(String message) {
         return message.startsWith("<enquete>") && message.endsWith("<enquete/>");
     }
-    // Extrai os dados da enquete (pergunta e opções) da mensagem
-    private String[] extractEnqueteData(String message) {
-        String enqueteContent = message.substring("<enquete>".length(), message.indexOf("<enquete/>"));
-        return enqueteContent.split(";");
-    }
-    // Verifica se a mensagem é privada
+
+    // Verifica se a mensagem é do tipo "mensagem privada"
     private boolean isPrivateMessage(String message) {
         return message.startsWith("<private>") && message.contains("<private/>");
     }
 
-    // Extrai o nome do destinatário de uma mensagem privada
+    // Extrai o destinatário de uma mensagem privada
     private String extractRecipient(String message) {
         int start = message.indexOf("<private>") + "<private>".length();
         int end = message.indexOf("<private/>");
         return message.substring(start, end);
     }
 
-    // Extrai o conteúdo da mensagem
+    // Extrai o conteúdo de uma mensagem
     private String extractMessageContent(String message) {
         int start = message.indexOf("<msg>") + "<msg>".length();
         int end = message.indexOf("<msg/>");
         return message.substring(start, end);
     }
 
-    // Verifica se a mensagem está no formato correto
+    // Verifica se a mensagem é uma mensagem válida
     private boolean isValidMessage(String message) {
         return message.startsWith("<msg>") && message.endsWith("<msg/>");
     }
+
     // Verifica se a mensagem contém uma tag de emoji
     private boolean containsEmojiTag(String message) {
         return message.matches(".*<emoji:[a-zA-Z]+>.*");
     }
-// 🫂😘🤝
 
-    private String replaceEmojiTagWithEmoji(String message, String emoji) {
-        return message.replaceAll("<emoji:[a-zA-Z]+>", emoji);
-    }
-
-    // Extrai o nome do emoji da mensagem
+    // Extrai o nome do emoji de uma mensagem
     private String extractEmojiName(String message) {
-        // Use uma expressão regular para encontrar a tag do emoji
-        // e extrair o nome do emoji
         String regex = "<emoji:([a-zA-Z]+)>";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(message);
         if (matcher.find()) {
-            return matcher.group(1); // Captura somente o nome do emoji
+            return matcher.group(1);
         }
-        return null; // Retorna null se nenhum nome de emoji for encontrado
+        return null;
     }
 
 }
